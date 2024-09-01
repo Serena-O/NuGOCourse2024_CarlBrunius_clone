@@ -14,6 +14,13 @@ load(file = 'HealthyNordicDiet.rda')
 # Extract metabolite data
 MB <- HealthyNordicDiet$MetaboliteData
 View(MB)
+# Metabolites in the columns
+# Individuals in the rows
+
+
+
+
+
 
 # Make a PCA of the metabolite data
 pca <- prcomp(MB, center = TRUE, scale = TRUE)
@@ -21,13 +28,20 @@ pca <- prcomp(MB, center = TRUE, scale = TRUE)
 # PCA biplot
 rdCV::biplotPCA(pca, comps = 1:2, labPlSc = FALSE)
 
+
+
+
+
+
 # Extract baseline data
 BL <- HealthyNordicDiet$BaselineData
 View(BL)
+# Group is T2D status 10 years later
+# PairedInfo is the matched case/control pair number. Examine e.g. the matching factors (gender, age and BMI) of these case/control pairs
 BL[c(1, 501),]
 BL[c(5, 505),]
 
-# PCA biplot colored by baseline characteristics - continuous
+# PCA biplot colored by baseline characteristics - continuous variables
 rdCV::biplotPCA(pca, comps = 1:2, xCol = BL$Energy, labPlSc = FALSE)
 rdCV::biplotPCA(pca, comps = 1:2, xCol = BL$Age, labPlSc = FALSE)
 rdCV::biplotPCA(pca, comps = 1:2, xCol = BL$BMI, labPlSc = FALSE)
@@ -40,12 +54,16 @@ rdCV::biplotPCA(pca, comps = 1:2, colSc = BL$Smoking, labPlSc = FALSE)
 rdCV::biplotPCA(pca, comps = 1:2, colSc = BL$PhysicalActivityIndex, labPlSc = FALSE)
 rdCV::biplotPCA(pca, comps = 1:2, colSc = BL$Education, labPlSc = FALSE)
 
+# Which baseline variables seem to relate to the metabolite PCA?
 
 
 
 
-# Choose variables to do metabotyping (clustering)
+
+# Choose baseline variables for the metabotyping (clustering)
 # Cluster based on age, BMI and fasting glucose
+# You may try different variable combinations
+# What do you think will happen to the clustering if you don't scale variables?
 clusterData <- scale(BL[, c(6, 7, 11)])
 clusterData <- as.data.frame(clusterData)
 head(clusterData)
@@ -55,8 +73,15 @@ library(factoextra)
 fviz_nbclust(clusterData, kmeans, method='silhouette')
 # Silhouette scores indicate 2 clusters
 k <- kmeans(clusterData, 2)
+# Extract metabotypes
 metabotype <- as.factor(k$cluster)
 table(metabotype)
+
+
+
+
+
+
 
 # Examine how metabotypes relate to the clustering variables
 library(vioplot)
@@ -81,12 +106,13 @@ rdCV::biplotPCA(pca, comps = 1:2, colSc = metabotype, labPlSc = FALSE)
 
 
 
-# Some quick analyses to investigate metabotype attributes
+# Some quick analyses to investigate metabotype attributes (among baseline characteristics)
 par(mfrow = c(1, 1), mar = c(4, 4, 0, 0) + 0.5)
-vioplot(BL$Energy ~ metabotype, col = c('green', 'red'), ylab = 'Total Energy') # A little higher energy intake in metabotype 1
+vioplot(BL$Energy ~ metabotype, col = c('green', 'red'), ylab = 'Total Energy') # Not really related to energy...
 ttest <- t.test(BL$Energy[metabotype == 1], BL$Energy[metabotype == 2]) 
 legend('topleft', paste('p =', sprintf("%.3f", ttest$p.value)), bty = 'n')
 
+# Make a convenience funtction for chi square tests
 makeChisq <- function(variable) {
   variableName <- deparse(substitute(variable))
   cat('Chi2 test for variable:', variableName, '\n\n')
@@ -102,6 +128,7 @@ makeChisq(BL$Gender) # Gender not associated to metabotype
 makeChisq(BL$Smoking) # Smoking not associated to metabotype
 makeChisq(BL$PhysicalActivityIndex) # PA borderline associated to metabotype
 makeChisq(BL$Education) # Education associated to metabotype
+
 
 
 
@@ -141,7 +168,7 @@ getVIRank(HND_model, model = 'min')
 
 
 
-# Extract Variables-of-Interest
+# Extract Variables-of-Interest (VoI)
 VoI <- subset(MB, select = getVIRank(HND_model, model = 'min')$name)
 head(VoI)
 
@@ -168,3 +195,5 @@ for(dietItem in 1:ncol(diet)) {
   wtest <- wilcox.test(diet[metabotype == 1, dietItem][[1]], diet[metabotype == 2, dietItem][[1]])
   legend('topleft', paste('p =', sprintf("%.3f", wtest$p.value)), bty = 'n')
 }
+
+
