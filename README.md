@@ -4,9 +4,9 @@ This is a companion repository to the NuGO / NUTRIOME post-graduate course
 https://www.nugoweek2024.com/post-graduate-course, 
 containing guidance documents for the computer labs in metabotyping and dynamical modeling.
 
-Good luck and happy coding!
-Carl Brunius, Chalmers University of Technology
-Tim Cardilin, Fraunhofer Chalmers Center
+Good luck and happy coding!  
+Carl Brunius, Chalmers University of Technology  
+Tim Cardilin, Fraunhofer Chalmers Center  
 
 ## Metabotyping
 Document | Description
